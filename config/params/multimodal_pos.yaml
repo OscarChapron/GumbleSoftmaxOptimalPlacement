@@ -1,0 +1,36 @@
+# @package _global_
+inp_pos:
+  train: '/DATASET/envs/oscar/eNATL60_BLB002_pos.nc'
+  test: '/DATASET/envs/oscar/NATL60GULF-CJM165_pos.nc'
+## Specific components
+pos_da_train: 
+  _target_: contrib.multimodal_pos.load_natl_data_pos
+  tgt_path: ${paths.tgt.train}
+  inp_path: ${paths.inp.train}
+  pos_path: ${inp_pos.train}
+  tgt_var: ecs
+  inp_var: ecs
+  pos_var: pos_0_001
+
+pos_da_test: 
+  _target_: contrib.multimodal_pos.load_natl_data_pos
+  tgt_path: ${paths.tgt.test}
+  inp_path: ${paths.inp.test}
+  pos_path: ${inp_pos.train}
+  tgt_var: ecs
+  inp_var: ecs
+  pos_var: pos_0_001
+
+## Override config
+train_dm:
+  _target_: contrib.multimodal_pos.MultiModalPosDataModule
+  input_da: ${pos_da_train}
+  
+test_dm:
+  _target_: contrib.multimodal_pos.MultiModalPosDataModule
+  input_da: ${pos_da_test}
+
+model:
+  _target_: contrib.multimodal_pos.Lit4dVarNetPos
+
+
