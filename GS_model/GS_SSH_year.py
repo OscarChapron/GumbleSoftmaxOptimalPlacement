@@ -82,7 +82,7 @@ def optimal_interpolation_chunk(
 
     # Cholesky
     jitter = 1e-6 * torch.eye(K_oo.size(0), device=device)
-    L = torch.cholesky(K_oo + jitter)
+    L = torch.linalg.cholesky(K_oo + jitter)
     alpha = torch.cholesky_solve(observed_values.unsqueeze(1), L)  # Nx1
 
     # Predict for missing in chunks
@@ -163,7 +163,7 @@ def optimal_interpolation(data_with_nans, length_scale=15., sigma_f=1.0, sigma_n
     K_s = cov_func(observed_coords, missing_coords, length_scale, sigma_f)
 
     # Cholesky decomposition
-    L = torch.cholesky(K + 1e-6 * torch.eye(K.size(0), device=device))  # Add jitter for numerical stability
+    L = torch.linalg.cholesky(K + 1e-6 * torch.eye(K.size(0), device=device))  # Add jitter for numerical stability
 
     # Solve for alpha
     alpha = torch.cholesky_solve(observed_values.unsqueeze(1), L)
@@ -269,6 +269,8 @@ alpha = 0.9
 lr = 1e-1
 # Select the first 3 time steps to check the code
 tgt_ds = xr.open_dataset('/Odyssey/public/natl60/ssh/NATL60-CJM165-ssh-2012-2013-1_20.nc')
+#tgt_ds = tgt_ds.isel(time=slice(0, 3))
+
 # Initialize lists to store results for all time steps
 all_mean_loss_list = []
 all_mean_points_list = []
@@ -375,7 +377,7 @@ for time_step in tgt_ds.time:
     all_time_steps.append(time_step.item())
 
     # Save logits and observation probabilities for this time step
-    logits_da = xr.DataArray(model.logits[1, 0, :, :].detach().cpu().numpy(), dims=['logit', 'time', 'lat', 'lon'], coords={'time': [time_step.item()], 'lat': inp_da_GS_crop.lat, 'lon': inp_da_GS_crop.lon}, name='logits')
+    logits_da = xr.DataArray(model.logits[1, 0, :, :].detach().cpu().numpy(), dims=['lat', 'lon'], coords={'lat': inp_da_GS_crop.lat, 'lon': inp_da_GS_crop.lon}, name='logits')
     obs_prob_da = xr.DataArray(1 - 1 / (1 + np.exp(-model.logits[1, 0, :, :].detach().cpu().numpy())), dims=['lat', 'lon'], coords={'lat': inp_da_GS_crop.lat, 'lon': inp_da_GS_crop.lon}, name='obs_prob')
 
     all_logits_list.append(logits_da)
