@@ -1,0 +1,12 @@
+Image
+outputs
+**/__pycache__
+src_old
+src
+old_file
+GS_model/outputs
+GS_model/job
+*.png
+*.mp4
+*.nc
+*.ckpt
